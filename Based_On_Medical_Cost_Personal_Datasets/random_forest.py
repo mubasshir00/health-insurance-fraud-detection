@@ -44,3 +44,29 @@ class_report = classification_report(y_test, y_pred)
 #------------------------------------------------#
 # Load input from user or csv
 input_df = pd.read_csv('dataset/Input.csv')
+
+# Check if all required columns are present
+required_columns = ["age", "sex", "bmi", "children", "smoker", "region"]
+missing_columns = [col for col in required_columns if col not in input_df.columns]
+
+if missing_columns:
+    print("\n⚠️ Missing Columns:", missing_columns)
+    print("Please ensure your input file has the correct columns.")
+else:
+    # Encode categorical columns
+    input_df["sex"] = encoder.fit_transform(input_df["sex"])
+    input_df["smoker"] = encoder.fit_transform(input_df["smoker"])
+    input_df["region"] = encoder.fit_transform(input_df["region"])
+
+    # Ensure column order matches training data
+    input_df = input_df[required_columns]
+
+    # Make predictions
+    input_predictions = rf_model.predict(input_df)
+
+    # Add predictions to the input dataframe
+    input_df["fraud_prediction"] = ["Fraudulent Claim 🚨" if p == 1 else "Clean Claim " for p in input_predictions]
+
+    # Print predictions
+    print("\n Predictions:")
+    print(input_df[["fraud_prediction"]])
